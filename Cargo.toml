@@ -1,0 +1,23 @@
+[package]
+name = "frame-ocr"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+ocrs = "0.9.0"
+actix-web = "4"
+image = { version = "0.25.4", default-features = false, features = ["png"] }
+actix-multipart = "0.7.2"
+futures = "0.3.31"
+url = "2.5.2"
+anyhow = "1.0.90"
+rten = "0.13.1"
+rten-imageproc = "0.13.1"
+rten-tensor = "0.13.1"
+lazy_static = "1.5.0"
+ureq = "2.10.1"
+home = "0.5.9"
+
+[features]
+avx512 = ["rten/avx512"]
