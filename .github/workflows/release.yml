@@ -1,0 +1,50 @@
+name: Build and Publish Binaries
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: frame-ocr
+            asset_name: ${{ github.event.repository.name }}-linux-gnu-amd64
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            artifact_name: frame-ocr.exe
+            asset_name: ${{ github.event.repository.name }}-windows-amd64.exe
+            target: x86_64-pc-windows-gnu
+          - os: ubuntu-latest
+            artifact_name: frame-ocr
+            asset_name: ${{ github.event.repository.name }}-linux-musl-amd64
+            target: x86_64-unknown-linux-musl
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup default stable
+          cargo install cross
+
+      - name: Build
+        run: |
+          source $HOME/.cargo/env
+          cross build --target ${{ matrix.target }} --release
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          release_name: "Build #${{ github.run_number }}"
+          tag: build-${{ github.run_number }}
+          overwrite: true
